@@ -99,7 +99,7 @@ export const useAuth = () => useContext(AuthContext);
 // Helper to process referral (calls the admin API we already created)
 async function processReferral(code, newUserId, newUserName) {
   try {
-    const res = await fetch('http://localhost:3001/api/referral/process', {
+    const res = await fetch('https://handloom-store.netlify.app/api/referral/process', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ referralCode: code, newUserId, newUserName }),
