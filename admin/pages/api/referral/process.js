@@ -1,9 +1,3 @@
-import admin from '../../../lib/firebase-admin'; // we'll need firebase-admin
-
-// But to keep it simple, we'll use the client-side firebase (not recommended for API routes).
-// We'll instead use the regular firebase imports and handle it.
-// Alternatively, we can use the server-side db via admin SDK. For simplicity we'll use the same `db` from client lib.
-
 import { db } from '../../../lib/firebase';
 import { collection, query, where, getDocs, addDoc, updateDoc, doc, increment } from 'firebase/firestore';
 
@@ -15,7 +9,7 @@ export default async function handler(req, res) {
     // Find referrer
     const referrerQuery = query(collection(db, 'users'), where('referralCode', '==', referralCode));
     const referrerSnap = await getDocs(referrerQuery);
-    if (referrerSnap.empty) return res.status(400).json({ error: 'Invalid code' });
+    if (referrerSnap.empty) return res.status(400).json({ error: 'Invalid referral code' });
     const referrerDoc = referrerSnap.docs[0];
     const referrerId = referrerDoc.id;
 
@@ -41,7 +35,7 @@ export default async function handler(req, res) {
     });
 
     // Generate welcome discount for referred user
-    const couponCode = 'WELCOME' + Math.random().toString(36).substring(2,8).toUpperCase();
+    const couponCode = 'WELCOME' + Math.random().toString(36).substring(2, 8).toUpperCase();
     await addDoc(collection(db, 'coupons'), {
       code: couponCode,
       discountType: 'percentage',
