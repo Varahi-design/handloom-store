@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { RecaptchaVerifier } from 'firebase/auth';
 import { auth } from '../lib/firebase';
+import toast from 'react-hot-toast';
 
 export default function Login() {
   const [tab, setTab] = useState('email');
@@ -23,10 +24,14 @@ export default function Login() {
   };
 
   const handleSendOTP = async () => {
-    const recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
-    const id = await sendOTP(phone, recaptcha);
-    setVerificationId(id);
-    toast.success('OTP sent');
+    try {
+      const recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', { size: 'invisible' });
+      const id = await sendOTP(phone, recaptcha);
+      setVerificationId(id);
+      toast.success('OTP sent');
+    } catch (err) {
+      toast.error(err.message);
+    }
   };
 
   const handleVerifyOTP = async (e) => {
@@ -36,7 +41,7 @@ export default function Login() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-16">
-      <h1 className="text-3xl font-bold text-primary mb-8 text-center">Login</h1>
+      <h1 className="text-3xl font-bold text-primary mb-8 text-center">Customer Login</h1>
       <div className="flex border-b mb-4">
         <button onClick={() => setTab('email')} className={`flex-1 py-2 ${tab==='email'?'border-b-2 border-primary font-bold':''}`}>Email</button>
         <button onClick={() => setTab('phone')} className={`flex-1 py-2 ${tab==='phone'?'border-b-2 border-primary font-bold':''}`}>Phone</button>
