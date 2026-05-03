@@ -40,7 +40,7 @@ export default function Navbar() {
                 </button>
                 {userMenuOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                    <Link href="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</Link>
+                    <Link href="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Profile</Link>
                     <Link href="/referral" className="block px-4 py-2 text-gray-700 hover:bg-gray-100">
                       <FaGift className="inline mr-2" />Refer & Earn
                     </Link>
@@ -71,6 +71,12 @@ export default function Navbar() {
               <>
                 <Link href="/login" className="block py-1">Login</Link>
                 <Link href="/signup" className="block py-1">Sign Up</Link>
+              </>
+            )}
+            {user && (
+              <>
+                <Link href="/profile" className="block py-1">My Profile</Link>
+                <Link href="/referral" className="block py-1">Refer & Earn</Link>
               </>
             )}
           </div>
