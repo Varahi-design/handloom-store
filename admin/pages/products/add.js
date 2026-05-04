@@ -17,43 +17,58 @@ export default function AddProduct() {
     fabric: '',
     color: '',
     inStock: true,
+    images: [],
   });
-  const [imageFiles, setImageFiles] = useState([]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setProduct(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setProduct(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
-  const uploadToCloudinary = async (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    const res = await fetch('/api/cloudinary/upload', { method: 'POST', body: formData });
-    if (!res.ok) throw new Error('Upload failed');
-    const data = await res.json();
-    return data.url;
-  };
+  // Open Cloudinary Upload Widget (client-side)
+  const handleImageUpload = () => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) {
+      toast.error('Cloudinary cloud name not configured');
+      return;
+    }
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    setImageFiles(prev => [...prev, ...files]);
+    // @ts-ignore – Cloudinary global script included in _app.js
+    const widget = cloudinary.createUploadWidget(
+      {
+        cloudName: cloudName,
+        uploadPreset: 'handloom_upload',
+        multiple: true,
+        folder: 'handloom-products',
+      },
+      (error, result) => {
+        if (!error && result && result.event === 'success') {
+          setProduct(prev => ({
+            ...prev,
+            images: [...prev.images, result.info.secure_url],
+          }));
+          toast.success('Image uploaded');
+        }
+        if (error) {
+          toast.error('Upload failed');
+        }
+      }
+    );
+    widget.open();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    try {
-      const imageUrls = [];
-      for (const file of imageFiles) {
-        const url = await uploadToCloudinary(file);
-        imageUrls.push(url);
-      }
 
+    try {
       const productData = {
         ...product,
         price: parseFloat(product.price),
         discountPercentage: parseFloat(product.discountPercentage) || 0,
-        images: imageUrls,
         createdAt: new Date().toISOString(),
       };
 
@@ -87,17 +102,31 @@ export default function AddProduct() {
         </div>
         <textarea name="description" value={product.description} onChange={handleChange} rows="3" className="border p-2 rounded w-full" placeholder="Description" required />
 
-        {/* Image upload */}
+        {/* Image upload button – replaces old file input */}
         <div>
-          <label className="block font-medium mb-1">Images</label>
-          <div className="border-dashed border-2 p-4 text-center">
-            <FaUpload className="mx-auto text-2xl text-gray-400" />
-            <input type="file" multiple accept="image/*" onChange={handleImageUpload} />
-          </div>
-          {imageFiles.length > 0 && (
-            <div className="flex gap-2 mt-2">
-              {imageFiles.map((f, i) => (
-                <img key={i} src={URL.createObjectURL(f)} className="w-16 h-16 object-cover rounded" />
+          <label className="block text-sm font-medium mb-1">Product Images</label>
+          <button type="button" onClick={handleImageUpload} className="bg-blue-500 text-white px-4 py-2 rounded flex items-center gap-2">
+            <FaUpload /> Upload Images
+          </button>
+
+          {product.images.length > 0 && (
+            <div className="flex gap-2 mt-2 flex-wrap">
+              {product.images.map((url, i) => (
+                <div key={i} className="relative">
+                  <img src={url} alt="Preview" className="w-16 h-16 object-cover rounded" />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setProduct(prev => ({
+                        ...prev,
+                        images: prev.images.filter((_, index) => index !== i),
+                      }))
+                    }
+                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
               ))}
             </div>
           )}
