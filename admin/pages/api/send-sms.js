@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import twilio from 'twilio';
 
 export default async function handler(req, res) {

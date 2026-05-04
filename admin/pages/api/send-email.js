@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import nodemailer from 'nodemailer';
 
 export default async function handler(req, res) {

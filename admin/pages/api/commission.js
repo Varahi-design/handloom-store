@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs, updateDoc, doc, increment, addDoc } from 'firebase/firestore';
 
